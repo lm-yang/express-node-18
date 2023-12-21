@@ -1,0 +1,136 @@
+on:
+  push:
+    branches:
+    - main
+jobs:
+  check-create-repo:
+    if: github.actor == 'bullet-dev-team'
+    strategy:
+      matrix:
+        region: [us-west-2]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Github Credential
+        run: |
+          case "${{ matrix.region }}" in
+            iad)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            us-west-2)
+              echo "ENV_SECRET=${{ secrets.PDX_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            nrt)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            cdg)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            bom)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            dub)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            syd)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            sin)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            cmh)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            fra)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            lhr)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+          esac
+      - name: Check if repo exists and create if not
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const repoName = context.repo.repo;
+            const owner = "bullet-dev-team-${{ matrix.region }}";
+            try {
+              await github.rest.repos.get({
+                owner: owner,
+                repo: repoName,
+              });
+              console.log("Repository exists");
+            } catch (error) {
+              if (error.status === 404) {
+                console.log("Repository does not exist, creating...");
+                await github.rest.repos.createForAuthenticatedUser({
+                  name: repoName,
+                  private: true
+                });
+                console.log("Repository created");
+              } else {
+                console.log("Error occurred while creating repository:", error);
+              }
+            }
+          github-token: ${{ env.ENV_SECRET }}
+  sync_change_to_all_regions:
+    if: github.actor == 'bullet-dev-team'
+    needs: check-create-repo
+    strategy:
+      matrix:
+        region: [us-west-2]
+    runs-on: ubuntu-latest
+    steps:
+       - name: Setup Github Credential
+         run: |
+          case "${{ matrix.region }}" in
+            iad)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            us-west-2)
+              echo "ENV_SECRET=${{ secrets.PDX_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            nrt)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            cdg)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            bom)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            dub)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            syd)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            sin)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            cmh)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            fra)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+            lhr)
+              echo "ENV_SECRET=${{ secrets.IAD_TOKEN }}" >> $GITHUB_ENV
+              ;;
+          esac
+          echo "REPO_NAME=$(echo ${GITHUB_REPOSITORY} | cut -d'/' -f2)" >> $GITHUB_ENV
+       
+       - uses: actions/checkout@v4
+         with:
+            ref: ${{ github.head_ref }}
+            fetch-depth: 0
+            token: ${{ secrets.MASTER_TOKEN }}
+       - name: Reconfigure git to use new token
+         run: |
+          git config --unset http.https://github.com/.extraheader
+          
+       - name: Push changes
+         uses: ad-m/github-push-action@master
+         with:
+           github_token: ${{ env.ENV_SECRET }}
+           repository: bullet-dev-team-${{ matrix.region }}/${{ env.REPO_NAME }}
+           branch: main
