@@ -14,7 +14,7 @@ jobs:
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
           secret-ids: |
-            SECRET_IAD,GITHUB_TOKENS/MASTER
+            SECRET_IAD,arn:aws:secretsmanager:us-east-1:241580540779:secret:GITHUB_TOKENS/MASTER-u0Kqa1
       - name: Setup Github Credential
         run: |
           case "${{ matrix.region }}" in
