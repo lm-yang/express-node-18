@@ -36,7 +36,7 @@ jobs:
         with:
           script: |
             const repoName = context.repo.repo;
-            const owner = "bullet-dev-team-${{ matrix.region }}";
+            const owner = "bullet-dev-team";
             try {
               await github.rest.repos.get({
                 owner: owner,
