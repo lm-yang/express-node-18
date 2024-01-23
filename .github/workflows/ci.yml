@@ -10,6 +10,10 @@ jobs:
         region: [us-east-1]
     runs-on: ubuntu-latest
     steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: Github-OIDC-Role-uaGL3MDzvfzm
       - name: Get secrets by name and by ARN
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
