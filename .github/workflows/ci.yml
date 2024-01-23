@@ -16,7 +16,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-east-1
-          role-to-assume: Github-OIDC-Role-uaGL3MDzvfzm
+          role-to-assume: arn:aws:iam::241580540779:role/Github-OIDC-Role-uaGL3MDzvfzm
       - name: Get secrets by name and by ARN
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
