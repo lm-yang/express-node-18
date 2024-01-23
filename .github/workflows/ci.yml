@@ -22,11 +22,13 @@ jobs:
         with:
           secret-ids: |
             SECRET_IAD,arn:aws:secretsmanager:us-east-1:241580540779:secret:GITHUB_TOKENS/MASTER-u0Kqa1
+          parse-json-secrets: true
       - name: Setup Github Credential
         run: |
+          printenv
           case "${{ matrix.region }}" in
             us-east-1)
-              echo "ENV_SECRET=${SECRET_IAD}" >> $GITHUB_ENV
+              echo "ENV_SECRET=${SECRET_IAD_MASTER}" >> $GITHUB_ENV
               ;;
           esac
       - name: Check if repo exists and create if not
