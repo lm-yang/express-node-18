@@ -28,11 +28,10 @@ jobs:
         run: |
           region="${{ matrix.region }}"
           secret_name="SECRET_$(echo ${region} | tr 'a-z-' 'A-Z_' | tr - _)"
-          echo ${region}
-          echo ${secret_name}
           echo "ENV_SECRET=${!secret_name}" >> ${GITHUB_ENV}
           echo "SECRET_MASTER=${SECRET_MASTER}" >> ${GITHUB_ENV}
           echo "REPO_NAME=$(echo ${GITHUB_REPOSITORY} | cut -d'/' -f2)" >> $GITHUB_ENV
+          printenv
       - name: Check if repo exists and create if not
         uses: actions/github-script@v5
         with:
