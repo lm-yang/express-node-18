@@ -27,7 +27,7 @@ jobs:
       - name: Setup Github Personal Access Token
         run: |
           region="${{ matrix.region }}"
-          secret_name="SECRET_${region^^//-/_}"
+          secret_name=$(echo ${region} | tr 'a-z-' 'A-Z_' | tr - _)
           echo ${region}
           echo ${secret_name}
           echo "ENV_SECRET=${!secret_name}" >> ${GITHUB_ENV}
