@@ -22,56 +22,14 @@ jobs:
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
           secret-ids: |
-            SECRET,arn:aws:secretsmanager:us-east-1:241580540779:secret:GITHUB_TOKENS/MASTER-u0Kqa1
+            SECRET,arn:aws:secretsmanager:us-east-1:241580540779:secret:GithubPAT-5w0tRn
           parse-json-secrets: true
       - name: Setup Github Personal Access Token
         run: |
+          printenv
           region="${{ matrix.region }}"
           secret_name="SECRET_$(echo ${region} | tr 'a-z-' 'A-Z_' | tr - _)"
           echo "ENV_SECRET=${!secret_name}" >> ${GITHUB_ENV}
           echo "SECRET_MASTER=${SECRET_MASTER}" >> ${GITHUB_ENV}
           echo "REPO_NAME=$(echo ${GITHUB_REPOSITORY} | cut -d'/' -f2)" >> $GITHUB_ENV
           printenv
-      - name: Check if repo exists and create if not
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const repoName = context.repo.repo;
-            const owner = "bullet-dev-team-${{ matrix.region }}";
-            try {
-              await github.rest.repos.get({
-                owner: owner,
-                repo: repoName,
-              });
-              console.log("Repository exists");
-            } catch (error) {
-              if (error.status === 404) {
-                console.log("Repository does not exist, creating...");
-                await github.rest.repos.createForAuthenticatedUser({
-                  name: repoName,
-                  private: true
-                });
-                console.log("Repository created");
-              } else {
-                console.log("Error occurred while creating repository:", error);
-              }
-            }
-          github-token: ${{ env.ENV_SECRET }}
-
-      - name: Checkout to current repository
-        uses: actions/checkout@v4
-        with:
-            ref: ${{ github.head_ref }}
-            fetch-depth: 0
-            token: ${{ env.SECRET_MASTER }}
-
-      - name: Reconfigure git to use new token
-        run: |
-          git config --unset http.https://github.com/.extraheader
-          
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-           github_token: ${{ env.ENV_SECRET }}
-           repository: bullet-dev-team-${{ matrix.region }}/${{ env.REPO_NAME }}
-           branch: main
